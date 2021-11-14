@@ -25,27 +25,28 @@ $ mix deps.get
 ...
 $ iex -S mix
 iex(1)> {:ok, pid} = PingMachine.start_ping("192.168.1.0/24")
-
-02:58:07.942 [info]  Started pinging all hosts in range 192.168.1.0/24
+[info]  Started pinging all hosts in range 192.168.1.0/24
 {:ok, #PID<0.212.0>}
-[info]  Successfully pinged host 192.168.1.143
-[error] Failed to ping host 192.168.1.144
-[info]  Successfully pinged host 192.168.1.145
-[error] Failed to ping host 192.168.1.146
-[info]  Successfully pinged host 192.168.1.147
-[error] Failed to ping host 192.168.1.155
-[info]  Successfully pinged host 192.168.1.156
+[info]  Successfully pinged host 192.168.1.139
+[info]  Successfully pinged host 192.168.1.254
+[error] Failed to ping host 192.168.1.29
+[info]  Successfully pinged host 192.168.1.21
+[info]  Successfully pinged host 192.168.1.108
+[error] Failed to ping host 192.168.1.119
+[info]  Successfully pinged host 192.168.1.16
+[error] Failed to ping host 192.168.1.109
 
 iex(2)> PingMachine.get_successful_hosts(pid)
-["192.168.1.212", "192.168.1.221", "192.168.1.18", "192.168.1.46",
- "192.168.1.25", "192.168.1.222", "192.168.1.132", "192.168.1.91",
- "192.168.1.89", "192.168.1.185", "192.168.1.39", "192.168.1.193",
- "192.168.1.47", "192.168.1.35", ...]
+[ "192.168.1.84", "192.168.1.161", "192.168.1.50", "192.168.1.2",
+ "192.168.1.226", "192.168.1.97", "192.168.1.186", "192.168.1.233",
+ "192.168.1.72", "192.168.1.148", "192.168.1.180", "192.168.1.203",
+ "192.168.1.73", "192.168.1.107", ...]
 
 iex(3)> PingMachine.get_failed_hosts(pid)
-["192.168.1.73", "192.168.1.123", "192.168.1.106", "192.168.1.196",
- "192.168.1.234", "192.168.1.202", "192.168.1.24", "192.168.1.201",
- "192.168.1.253", "192.168.1.238", "192.168.1.170", "192.168.1.146", ...]
+[ "192.168.1.113", "192.168.1.24", "192.168.1.101", "192.168.1.193",
+ "192.168.1.197", "192.168.1.219", "192.168.1.22", "192.168.1.165",
+ "192.168.1.128", "192.168.1.155", "192.168.1.76", "192.168.1.183",
+ "192.168.1.104", "192.168.1.110", "192.168.1.163", "192.168.1.156", ...]
 
 iex(4)> PingMachine.stop_ping(pid)
 :ok
