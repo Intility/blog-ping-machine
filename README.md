@@ -3,6 +3,8 @@
 Simple demo project demonstrating a few basic OTP concepts such as Supervisors,
 GenServers and Tasks.
 
+![Ping Machine](ping_machine.png)
+
 ## Running the project
 
 Just run the project using `iex -S mix` from the project root.
