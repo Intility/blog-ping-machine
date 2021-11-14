@@ -40,7 +40,7 @@ defmodule PingMachine.CIDRManager do
         # Pretends to send a ping request by sleeping some time and then
         # randomly selecting a return value for the task. Fails approx 1/3 tasks.
 
-        Process.sleep(100)
+        Enum.random(100..1000) |> Process.sleep()
         Enum.random([:ok, :ok, :error])
       end)
 
