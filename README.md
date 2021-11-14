@@ -21,6 +21,8 @@ result back to the "CIDR Manager", which then can be queried for the outcome.
 Just run the project using `iex -S mix` from the project root.
 
 ```shell
+$ mix deps.get
+...
 $ iex -S mix
 iex(1)> {:ok, pid} = PingMachine.start_ping("192.168.1.0/24")
 
