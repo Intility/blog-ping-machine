@@ -11,11 +11,9 @@ defmodule PingMachine.SubnetManager do
   end
 
   def init(subnet) do
-    {:ok, pid} = Task.Supervisor.start_link()
-
     # Send a message to our self that we should start pinging at once!
     Process.send(self(), :start_ping, [])
-    {:ok, %{task_supervisor: pid, subnet: subnet, tasks: MapSet.new()}}
+    {:ok, %{subnet: subnet, tasks: MapSet.new()}}
   end
 
   def handle_call(:successful_hosts, _from, state) do
@@ -37,7 +35,7 @@ defmodule PingMachine.SubnetManager do
   def handle_cast({:task, host}, state) do
     task =
       Task.Supervisor.async_nolink(
-        state.task_supervisor,
+        PingMachine.TaskSupervisor,
         fn ->
           # Pretends to send a ping request by sleeping some time and then
           # randomly selecting a return value for the task. Fails approx 1/3 tasks.
@@ -64,7 +62,7 @@ defmodule PingMachine.SubnetManager do
     {:noreply, state}
   end
 
-  # The task completed successfully
+  # The ping request succeeded
   def handle_info({ref, :ok}, state) do
     task =
       Enum.find(state.tasks, fn %{host: _host, status: _status, task: %{ref: r}} -> r == ref end)
@@ -82,12 +80,14 @@ defmodule PingMachine.SubnetManager do
     {:noreply, %{state | tasks: updated_tasks}}
   end
 
-  # The task failed
+  # The ping request failed
   def handle_info({ref, :error}, state) do
     task =
       Enum.find(state.tasks, fn %{host: _host, status: _status, task: %{ref: r}} -> r == ref end)
 
     Logger.error("Failed to ping host #{task.host}")
+
+    Process.demonitor(ref, [:flush])
 
     updated_tasks =
       MapSet.delete(state.tasks, task)
@@ -96,6 +96,7 @@ defmodule PingMachine.SubnetManager do
     {:noreply, %{state | tasks: updated_tasks}}
   end
 
+  # The task itself failed
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     {:noreply, state}
   end

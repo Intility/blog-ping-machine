@@ -9,7 +9,8 @@ defmodule PingMachine.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, strategy: :one_for_one, name: PingMachine.PingSupervisor},
-      {Registry, keys: :unique, name: PingMachine.Registry}
+      {Registry, keys: :unique, name: PingMachine.Registry},
+      {Task.Supervisor, name: PingMachine.TaskSupervisor}
       # Starts a worker by calling: PingMachine.Worker.start_link(arg)
       # {PingMachine.Worker, arg}
     ]
