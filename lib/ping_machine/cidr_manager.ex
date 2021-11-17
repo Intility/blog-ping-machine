@@ -1,4 +1,4 @@
-defmodule PingMachine.CIDRManager do
+defmodule PingMachine.SubnetManager do
   @moduledoc false
 
   use GenServer
@@ -6,16 +6,17 @@ defmodule PingMachine.CIDRManager do
   require Logger
   require IP.Subnet
 
-  def start_link(cidr) when IP.Subnet.is_subnet(cidr) do
-    GenServer.start_link(__MODULE__, cidr, name: :"#{__MODULE__}-#{IP.Subnet.to_string(cidr)}")
+  def start_link(subnet) when IP.Subnet.is_subnet(subnet) do
+    GenServer.start_link(__MODULE__, subnet, name: :"#{__MODULE__}-#{IP.Subnet.to_string(subnet)}")
   end
 
-  def init(cidr) when IP.Subnet.is_subnet(cidr) do
-    {:ok, pid} = Task.Supervisor.start_link(name: :"PingSupervisor-#{IP.Subnet.to_string(cidr)}")
+  def init(subnet) when IP.Subnet.is_subnet(subnet) do
+    {:ok, pid} =
+      Task.Supervisor.start_link(name: :"PingSupervisor-#{IP.Subnet.to_string(subnet)}")
 
     # Send a message to our self that we should start pinging at once!
     Process.send(self(), :start_ping, [])
-    {:ok, %{supervisor: pid, cidr: cidr, tasks: MapSet.new()}}
+    {:ok, %{supervisor: pid, subnet: subnet, tasks: MapSet.new()}}
   end
 
   def handle_call(:successful_hosts, _from, state) do
@@ -36,7 +37,7 @@ defmodule PingMachine.CIDRManager do
 
   def handle_cast({:task, host}, state) do
     task =
-      Task.Supervisor.async_nolink(:"PingSupervisor-#{IP.Subnet.to_string(state.cidr)}", fn ->
+      Task.Supervisor.async_nolink(:"PingSupervisor-#{IP.Subnet.to_string(state.subnet)}", fn ->
         # Pretends to send a ping request by sleeping some time and then
         # randomly selecting a return value for the task. Fails approx 1/3 tasks.
 
@@ -51,9 +52,9 @@ defmodule PingMachine.CIDRManager do
   end
 
   def handle_info(:start_ping, state) do
-    Enum.map(state.cidr, fn host ->
+    Enum.map(state.subnet, fn host ->
       GenServer.cast(
-        :"#{__MODULE__}-#{IP.Subnet.to_string(state.cidr)}",
+        :"#{__MODULE__}-#{IP.Subnet.to_string(state.subnet)}",
         {:task, IP.to_string(host)}
       )
     end)

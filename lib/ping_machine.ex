@@ -4,18 +4,18 @@ defmodule PingMachine do
   require IP.Subnet
   require Logger
 
-  def start_ping(cidr) when is_binary(cidr) do
-    with {:ok, cidr} <- IP.Subnet.from_string(cidr),
-         {:ok, pid} <- start_worker(cidr) do
-      Logger.info("Started pinging all hosts in range #{IP.Subnet.to_string(cidr)}")
+  def start_ping(subnet) when is_binary(subnet) do
+    with {:ok, subnet} <- IP.Subnet.from_string(subnet),
+         {:ok, pid} <- start_worker(subnet) do
+      Logger.info("Started pinging all hosts in range #{IP.Subnet.to_string(subnet)}")
       {:ok, pid}
     else
       {:error, {:already_started, pid}} ->
-        Logger.warn("Already running the #{cidr} range")
+        Logger.warn("Already running the #{subnet} range")
         {:ok, pid}
 
       {:error, :einval} = reply ->
-        Logger.error("#{cidr} is not a valid CIDR range")
+        Logger.error("#{subnet} is not a valid subnet range")
         reply
     end
   end
@@ -32,10 +32,10 @@ defmodule PingMachine do
     DynamicSupervisor.terminate_child(PingMachine.PingSupervisor, pid)
   end
 
-  defp start_worker(cidr) when IP.Subnet.is_subnet(cidr) do
+  defp start_worker(subnet) when IP.Subnet.is_subnet(subnet) do
     DynamicSupervisor.start_child(
       PingMachine.PingSupervisor,
-      {PingMachine.CIDRManager, cidr}
+      {PingMachine.SubnetManager, subnet}
     )
   end
 end

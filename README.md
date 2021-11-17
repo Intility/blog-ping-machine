@@ -2,7 +2,7 @@
 
 The ping machine demonstrates some core Elixir and OTP programming concepts using
 Supervision trees, GenServers and Tasks to concurrently ping all hosts in a
-CIDR range.
+Subnet range.
 
 ![Ping Machine](ping_machine.png)
 
@@ -11,10 +11,10 @@ but beside the point of this demo. We simply sleeps for a given amount of time a
 randomly choose if the "request" was successful or not.**
 
 Once the application starts, it will start a `DynamicSupervisor` ready to supervise ping jobs.
-For each CIDR range we want to ping, a "CIDR Manager" `GenServer` will start to
-keep track of which tasks succeeds and which fails. The "CIDR Manager" will run a `TaskSupervisor`,
+For each Subnet range we want to ping, a "Subnet Manager" `GenServer` will start to
+keep track of which tasks succeeds and which fails. The "Subnet Manager" will run a `TaskSupervisor`,
 which will be responsible for actually running the ping tasks. All ping tasks will report their
-result back to the "CIDR Manager", which then can be queried for the outcome.
+result back to the "Subnet Manager", which then can be queried for the outcome.
 
 ## Running the project
 
