@@ -7,12 +7,12 @@ defmodule PingMachine.SubnetManager do
   require IP.Subnet
 
   def start_link(subnet) when IP.Subnet.is_subnet(subnet) do
-    GenServer.start_link(__MODULE__, subnet, name: :"#{__MODULE__}-#{IP.Subnet.to_string(subnet)}")
+    GenServer.start_link(__MODULE__, subnet, name: via_tuple(IP.Subnet.to_string(subnet)))
   end
 
   def init(subnet) when IP.Subnet.is_subnet(subnet) do
     {:ok, pid} =
-      Task.Supervisor.start_link(name: :"PingSupervisor-#{IP.Subnet.to_string(subnet)}")
+      Task.Supervisor.start_link(name: via_tuple("PingSupervisor-#{IP.Subnet.to_string(subnet)}"))
 
     # Send a message to our self that we should start pinging at once!
     Process.send(self(), :start_ping, [])
@@ -37,13 +37,16 @@ defmodule PingMachine.SubnetManager do
 
   def handle_cast({:task, host}, state) do
     task =
-      Task.Supervisor.async_nolink(:"PingSupervisor-#{IP.Subnet.to_string(state.subnet)}", fn ->
-        # Pretends to send a ping request by sleeping some time and then
-        # randomly selecting a return value for the task. Fails approx 1/3 tasks.
+      Task.Supervisor.async_nolink(
+        via_tuple("PingSupervisor-#{IP.Subnet.to_string(state.subnet)}"),
+        fn ->
+          # Pretends to send a ping request by sleeping some time and then
+          # randomly selecting a return value for the task. Fails approx 1/3 tasks.
 
-        Enum.random(100..1000) |> Process.sleep()
-        Enum.random([:ok, :ok, :error])
-      end)
+          Enum.random(100..1000) |> Process.sleep()
+          Enum.random([:ok, :ok, :error])
+        end
+      )
 
     # Register the task in the GenServer state, so that we can track which
     # tasks responded with a successful ping request, and which didn't.
@@ -54,7 +57,7 @@ defmodule PingMachine.SubnetManager do
   def handle_info(:start_ping, state) do
     Enum.map(state.subnet, fn host ->
       GenServer.cast(
-        :"#{__MODULE__}-#{IP.Subnet.to_string(state.subnet)}",
+        via_tuple(IP.Subnet.to_string(state.subnet)),
         {:task, IP.to_string(host)}
       )
     end)
@@ -97,4 +100,6 @@ defmodule PingMachine.SubnetManager do
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     {:noreply, state}
   end
+
+  defp via_tuple(subnet), do: {:via, Registry, {PingMachine.Registry, subnet}}
 end

@@ -8,8 +8,8 @@ defmodule PingMachine.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {DynamicSupervisor, strategy: :one_for_one, name: PingMachine.PingSupervisor}
-
+      {DynamicSupervisor, strategy: :one_for_one, name: PingMachine.PingSupervisor},
+      {Registry, keys: :unique, name: PingMachine.Registry}
       # Starts a worker by calling: PingMachine.Worker.start_link(arg)
       # {PingMachine.Worker, arg}
     ]
