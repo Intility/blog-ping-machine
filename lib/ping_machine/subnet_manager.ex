@@ -38,7 +38,7 @@ defmodule PingMachine.SubnetManager do
   def handle_cast({:task, host}, state) do
     task =
       Task.Supervisor.async_nolink(
-        via_tuple("PingSupervisor-#{IP.Subnet.to_string(state.subnet)}"),
+        state.supervisor,
         fn ->
           # Pretends to send a ping request by sleeping some time and then
           # randomly selecting a return value for the task. Fails approx 1/3 tasks.
@@ -101,5 +101,5 @@ defmodule PingMachine.SubnetManager do
     {:noreply, state}
   end
 
-  defp via_tuple(subnet), do: {:via, Registry, {PingMachine.Registry, subnet}}
+  defp via_tuple(name), do: {:via, Registry, {PingMachine.Registry, name}}
 end
