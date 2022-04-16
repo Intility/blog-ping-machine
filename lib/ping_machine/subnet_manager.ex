@@ -36,7 +36,7 @@ defmodule PingMachine.SubnetManager do
 
   def handle_cast({:task, host}, state) do
     task =
-      Task.Supervisor.async(
+      Task.Supervisor.async_nolink(
         state.task_supervisor,
         fn ->
           # Pretends to send a ping request by sleeping some time and then
