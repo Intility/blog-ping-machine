@@ -10,13 +10,12 @@ defmodule PingMachine.SubnetManager do
     GenServer.start_link(__MODULE__, subnet, name: via_tuple(IP.Subnet.to_string(subnet)))
   end
 
-  def init(subnet) when IP.Subnet.is_subnet(subnet) do
-    {:ok, pid} =
-      Task.Supervisor.start_link(name: via_tuple("PingSupervisor-#{IP.Subnet.to_string(subnet)}"))
+  def init(subnet) do
+    {:ok, pid} = Task.Supervisor.start_link()
 
     # Send a message to our self that we should start pinging at once!
     Process.send(self(), :start_ping, [])
-    {:ok, %{supervisor: pid, subnet: subnet, tasks: MapSet.new()}}
+    {:ok, %{task_supervisor: pid, subnet: subnet, tasks: MapSet.new()}}
   end
 
   def handle_call(:successful_hosts, _from, state) do
@@ -37,8 +36,8 @@ defmodule PingMachine.SubnetManager do
 
   def handle_cast({:task, host}, state) do
     task =
-      Task.Supervisor.async_nolink(
-        state.supervisor,
+      Task.Supervisor.async(
+        state.task_supervisor,
         fn ->
           # Pretends to send a ping request by sleeping some time and then
           # randomly selecting a return value for the task. Fails approx 1/3 tasks.
