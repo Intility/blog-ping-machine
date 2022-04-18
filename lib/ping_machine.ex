@@ -20,16 +20,16 @@ defmodule PingMachine do
     end
   end
 
+  def stop_ping(pid) when is_pid(pid) do
+    DynamicSupervisor.terminate_child(PingMachine.PingSupervisor, pid)
+  end
+
   def get_successful_hosts(pid) when is_pid(pid) do
     GenServer.call(pid, :successful_hosts)
   end
 
   def get_failed_hosts(pid) when is_pid(pid) do
     GenServer.call(pid, :failed_hosts)
-  end
-
-  def stop_ping(pid) when is_pid(pid) do
-    DynamicSupervisor.terminate_child(PingMachine.PingSupervisor, pid)
   end
 
   defp start_worker(subnet) when IP.Subnet.is_subnet(subnet) do
