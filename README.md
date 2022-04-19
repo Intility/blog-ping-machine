@@ -4,7 +4,7 @@ The ping machine demonstrates some core Elixir and OTP programming concepts usin
 Supervision trees, GenServers and Tasks to concurrently ping all hosts in a
 Subnet range.
 
-![Ping Machine](ping_machine.png)
+![Ping Machine](illustration.png)
 
 **DISCLAIMER: We will not actually send any ping requests. This is trival to implement,
 but beside the point of this demo. We simply sleeps for a given amount of time and
@@ -50,4 +50,4 @@ iex(3)> PingMachine.get_failed_hosts(pid)
 
 iex(4)> PingMachine.stop_ping(pid)
 :ok
-  ```
+```
