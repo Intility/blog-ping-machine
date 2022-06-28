@@ -25,11 +25,11 @@ defmodule PingMachine.SubnetManager do
   end
 
   def handle_call(:failed_hosts, _from, state) do
-    success =
+    failed =
       Enum.filter(state.tasks, fn task -> task.status == :failed end)
       |> Enum.map(fn task -> task.host end)
 
-    {:reply, success, state}
+    {:reply, failed, state}
   end
 
   def handle_cast({:task, host}, state) do
