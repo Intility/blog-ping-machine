@@ -9,6 +9,9 @@ The ping machine demonstrates some core Elixir and OTP programming concepts usin
 but beside the point of this demo. We simply sleeps for a given amount of time and
 randomly choose if the "request" was successful or not.**
 
+If you would like to read the full tutorial, it's available over at the
+[{engineering@intility}](https://engineering.intility.com/article/building-a-concurrent-network-pinger-pt-1) blog!
+
 ## Running the project
 
 Just run the project using `iex -S mix` from the project root.
